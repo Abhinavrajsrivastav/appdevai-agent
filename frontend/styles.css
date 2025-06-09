@@ -2,9 +2,9 @@
 :root {
     --primary-color: #4a6cf7;
     --primary-dark: #3a57d7;
-    --secondary-color: #f8f9fa;
+    --secondary-color: #131414;
     --text-color: #333;
-    --light-gray: #e9ecef;
+    --light-gray: #000000;
     --dark-gray: #6c757d;
     --success-color: #28a745;
     --warning-color: #ffc107;
@@ -24,7 +24,7 @@ body {
     font-family: 'Roboto', sans-serif;
     line-height: 1.6;
     color: var(--text-color);
-    background-color: #f4f7fc;
+    background-color: #0b0b0b;
 }
 
 .container {
@@ -57,7 +57,7 @@ header p {
     justify-content: center;
     margin-bottom: 30px;
     border-radius: var(--border-radius);
-    background-color: white;
+    background-color: rgb(29, 28, 28);
     box-shadow: var(--box-shadow);
     overflow: hidden;
 }
@@ -65,7 +65,7 @@ header p {
 .tab-btn {
     padding: 15px 25px;
     border: none;
-    background-color: white;
+    background-color: rgb(122, 128, 142);
     color: var(--text-color);
     font-size: 1rem;
     font-weight: 500;
@@ -87,7 +87,7 @@ header p {
 /* Tab Content */
 .tab-content {
     display: none;
-    background-color: white;
+    background-color: rgb(255, 255, 255);
     border-radius: var(--border-radius);
     box-shadow: var(--box-shadow);
     padding: 30px;
