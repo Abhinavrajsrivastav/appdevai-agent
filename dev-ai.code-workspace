@@ -1,0 +1,44 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"editor.formatOnSave": true,
+		"python.linting.enabled": true,
+		"python.linting.pylintEnabled": true,
+		"python.analysis.extraPaths": [
+			"./backend"
+		],
+		"[python]": {
+			"editor.defaultFormatter": "ms-python.python"
+		},
+		"[javascript]": {
+			"editor.defaultFormatter": "esbenp.prettier-vscode"
+		},
+		"[html]": {
+			"editor.defaultFormatter": "esbenp.prettier-vscode"
+		},
+		"[css]": {
+			"editor.defaultFormatter": "esbenp.prettier-vscode"
+		}
+	},
+	"launch": {
+		"version": "0.2.0",
+		"configurations": [
+			{
+				"name": "Python: FastAPI",
+				"type": "python",
+				"request": "launch",
+				"module": "uvicorn",
+				"args": [
+					"backend.main:app",
+					"--reload"
+				],
+				"jinja": true,
+				"justMyCode": true
+			}
+		]
+	}
+}

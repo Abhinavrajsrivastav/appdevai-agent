@@ -1,0 +1,70 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Start Backend Server",
+            "type": "shell",
+            "command": "cd backend && venv\\Scripts\\activate && uvicorn main:app --reload",
+            "isBackground": true,
+            "problemMatcher": [
+                {
+                    "pattern": [
+                        {
+                            "regexp": ".",
+                            "file": 1,
+                            "location": 2,
+                            "message": 3
+                        }
+                    ],
+                    "background": {
+                        "activeOnStart": true,
+                        "beginsPattern": "^INFO:     Started server process",
+                        "endsPattern": "^INFO:     Application startup complete"
+                    }
+                }
+            ],
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Open Frontend in Browser",
+            "type": "shell",
+            "command": "start \"\" \"${workspaceFolder}\\frontend\\index.html\"",
+            "presentation": {
+                "reveal": "silent",
+                "panel": "new"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Run Project (Backend + Frontend)",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "Start Backend Server",
+                "Open Frontend in Browser"
+            ],
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Start Dev AI Agent",
+            "type": "shell",
+            "command": "${workspaceFolder}\\start.bat",
+            "isBackground": true,
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "problemMatcher": []
+        }
+    ]
+}

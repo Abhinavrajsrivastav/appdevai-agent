@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dev AI Agent - Job Seeker Assistant</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Dev AI Agent</h1>
+            <p>Your AI-powered job application assistant</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="chat">AI Chat</button>
+            <button class="tab-btn" data-tab="ats">ATS Score Checker</button>
+            <button class="tab-btn" data-tab="jobs">Job Finder</button>
+            <button class="tab-btn" data-tab="cover">Cover Letter Generator</button>
+        </div>
+
+        <div class="tab-content active" id="chat-tab">
+            <div class="chat-container">
+                <div class="chat-messages" id="chat-messages">
+                    <div class="message bot">
+                        <div class="message-content">
+                            <p>👋 Hello! I'm your job application assistant. I can help you with:</p>
+                            <ul>
+                                <li>Checking your resume's ATS score for specific job descriptions</li>
+                                <li>Finding relevant job opportunities based on your experience</li>
+                                <li>Generating professional cover letters tailored to job descriptions</li>
+                            </ul>
+                            <p>How can I help you today?</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="chat-input">
+                    <textarea id="user-input" placeholder="Type your message here..."></textarea>
+                    <button id="send-btn">Send</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="ats-tab">
+            <div class="tool-container">
+                <h2>ATS Score Checker</h2>
+                <p>Upload your resume and paste a job description to get an ATS compatibility score.</p>
+                
+                <form id="ats-form" class="tool-form">
+                    <div class="form-group">
+                        <label for="ats-resume">Upload Resume (PDF)</label>
+                        <input type="file" id="ats-resume" accept=".pdf" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="ats-jd">Job Description</label>
+                        <textarea id="ats-jd" rows="10" placeholder="Paste the job description here..." required></textarea>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn">Check ATS Score</button>
+                </form>
+                
+                <div class="result-container" id="ats-result">
+                    <!-- Results will be displayed here -->
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="jobs-tab">
+            <div class="tool-container">
+                <h2>Job Finder</h2>
+                <p>Find relevant job opportunities based on your experience and preferences.</p>
+                
+                <form id="jobs-form" class="tool-form">
+                    <div class="form-group">
+                        <label for="jobs-resume">Upload Resume (PDF)</label>
+                        <input type="file" id="jobs-resume" accept=".pdf" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="jobs-experience">Years of Experience</label>
+                        <input type="number" id="jobs-experience" min="0" step="0.5" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="jobs-location">Preferred Location</label>
+                        <input type="text" id="jobs-location" placeholder="e.g., New York, Remote, etc." required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="jobs-type">Job Type (Optional)</label>
+                        <select id="jobs-type">
+                            <option value="">Any</option>
+                            <option value="Full-time">Full-time</option>
+                            <option value="Part-time">Part-time</option>
+                            <option value="Contract">Contract</option>
+                            <option value="Remote">Remote</option>
+                            <option value="Internship">Internship</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn">Find Jobs</button>
+                </form>
+                
+                <div class="result-container" id="jobs-result">
+                    <!-- Results will be displayed here -->
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="cover-tab">
+            <div class="tool-container">
+                <h2>Cover Letter Generator</h2>
+                <p>Generate a tailored cover letter based on your resume and a job description.</p>
+                
+                <form id="cover-form" class="tool-form">
+                    <div class="form-group">
+                        <label for="cover-resume">Upload Resume (PDF)</label>
+                        <input type="file" id="cover-resume" accept=".pdf" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="cover-jd">Job Description</label>
+                        <textarea id="cover-jd" rows="10" placeholder="Paste the job description here..." required></textarea>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn">Generate Cover Letter</button>
+                </form>
+                
+                <div class="result-container" id="cover-result">
+                    <!-- Results will be displayed here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Dev AI Agent. All rights reserved.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

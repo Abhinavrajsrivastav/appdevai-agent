@@ -1,0 +1,9 @@
+{
+    "servers": {
+        "dev-ai-agent": {
+            "type": "stdio",
+            "command": "cd backend && venv\\Scripts\\activate && uvicorn main:app",
+            "args": ["--host", "0.0.0.0", "--port", "8000"]
+        }
+    }
+}
