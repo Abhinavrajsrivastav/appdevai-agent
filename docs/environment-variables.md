@@ -6,7 +6,7 @@ This project uses environment variables to manage sensitive information like API
 
 ## Setup
 
-1. Create a `.env` file in the `backend/` directory
+1. Create a `.env` file in the `backend/` directory (you can copy from `.env.example` as a template)
 2. Add your environment variables in the format `KEY=VALUE`
 
 Example `.env` file content:
