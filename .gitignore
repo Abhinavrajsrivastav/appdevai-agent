@@ -1,5 +1,7 @@
-# Ignore environment variables file
-backend/.env
+# Ignore environment variables files
+**/.env
+**/.env.*
+!**/.env.example
 
 # Python
 __pycache__/
