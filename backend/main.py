@@ -14,6 +14,8 @@ import logging
 from config import GEMINI_API_KEY, MAX_TOKENS, TEMPERATURE
 # Import utilities
 from utils import extract_text_from_pdf
+# Import the automated job application functionality
+from job_application_automator import automated_job_application, get_applications
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -105,7 +107,22 @@ cover_letter_tool = Tool(
     ]
 )
 
-available_tools = [ats_tool, job_search_tool, cover_letter_tool]
+job_application_tool = Tool(
+    name="job_applicator",
+    description="Automatically applies to a job using the user's resume",
+    parameters=[
+        ToolParameter(name="resume_content", type="string", description="The content of the resume", required=True),
+        ToolParameter(name="job_data", type="object", description="The job data including application link", required=True)
+    ]
+)
+
+application_status_tool = Tool(
+    name="application_status",
+    description="Gets the status of all job applications",
+    parameters=[]
+)
+
+available_tools = [ats_tool, job_search_tool, cover_letter_tool, job_application_tool, application_status_tool]
 
 # Tool implementation functions
 async def ats_score_checker(resume_content: str, job_description: str) -> Dict[str, Any]:
@@ -361,6 +378,38 @@ async def cover_letter_generator(resume_content: str, job_description: str) -> D
         logger.error(f"Error in cover letter generation: {str(e)}")
         return {"error": str(e)}
 
+async def job_applicator(resume_content: str, job_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Apply to a job automatically using the user's resume"""
+    if not GEMINI_API_KEY or GEMINI_API_KEY == "your-api-key-here":
+        logger.error("Invalid or missing Gemini API key in job_applicator")
+        return {
+            "error": "The Gemini API key is not configured. Please add a valid API key to the .env file."
+        }
+    
+    try:
+        # Call the automated job application function
+        result = await automated_job_application(job_data, resume_content)
+        return result
+    except Exception as e:
+        logger.error(f"Error in job application: {str(e)}")
+        return {"error": str(e)}
+
+async def application_status() -> Dict[str, Any]:
+    """Get the status of all job applications"""
+    if not GEMINI_API_KEY or GEMINI_API_KEY == "your-api-key-here":
+        logger.error("Invalid or missing Gemini API key in application_status")
+        return {
+            "error": "The Gemini API key is not configured. Please add a valid API key to the .env file."
+        }
+    
+    try:
+        # Get all applications
+        result = await get_applications()
+        return result
+    except Exception as e:
+        logger.error(f"Error getting application status: {str(e)}")
+        return {"error": str(e)}
+
 # MCP Protocol endpoints
 @app.post("/mcp")
 async def mcp_endpoint(request: MCPRequest) -> MCPResponse:
@@ -380,6 +429,8 @@ async def mcp_endpoint(request: MCPRequest) -> MCPResponse:
         1. ats_score_checker - Analyzes a resume against a job description for ATS compatibility
         2. job_finder - Finds relevant job opportunities based on user criteria
         3. cover_letter_generator - Creates a professional cover letter based on resume and job description
+        4. job_applicator - Automatically applies to a job using the user's resume
+        5. application_status - Gets the status of all job applications
         
         Help the user with job applications by asking for necessary information and using the appropriate tool.
         """
@@ -431,6 +482,16 @@ async def mcp_endpoint(request: MCPRequest) -> MCPResponse:
             elif tool_results.get("name") == "cover_letter_generator":
                 formatted_response = "Here is your generated cover letter:\n\n"
                 formatted_response += tool_results.get("result", {}).get("cover_letter", "Could not generate cover letter.")
+            
+            elif tool_results.get("name") == "job_applicator":
+                formatted_response = "Job application submitted successfully."
+                # Include any additional status information from the result
+                result = tool_results.get("result", {})
+                if isinstance(result, dict):
+                    if "application_link" in result:
+                        formatted_response += f"\nYou can check the application status at: {result['application_link']}"
+                    if "status" in result:
+                        formatted_response += f"\nApplication status: {result['status']}"
             
             return MCPResponse(
                 id=str(uuid.uuid4()),
@@ -493,6 +554,27 @@ async def mcp_endpoint(request: MCPRequest) -> MCPResponse:
                         ToolCallParameter(name="resume_content", value="${resume_content}"),
                         ToolCallParameter(name="job_description", value="${job_description}")
                     ]
+                )
+            ]
+        elif "apply" in user_message_lower or "application" in user_message_lower:
+            # Need resume and job data
+            tool_calls = [
+                ToolCall(
+                    id=str(uuid.uuid4()),
+                    name="job_applicator",
+                    parameters=[
+                        ToolCallParameter(name="resume_content", value="${resume_content}"),
+                        ToolCallParameter(name="job_data", value="${job_data}")
+                    ]
+                )
+            ]
+        elif "status" in user_message_lower or "application status" in user_message_lower:
+            # No parameters needed, just call the status tool
+            tool_calls = [
+                ToolCall(
+                    id=str(uuid.uuid4()),
+                    name="application_status",
+                    parameters=[]
                 )
             ]
             
@@ -643,39 +725,117 @@ async def api_cover_letter_generator(
         logger.error(f"Error in cover letter API: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post("/tools/job_applicator")
+async def api_job_applicator(
+    resume: UploadFile = File(...),
+    job_data: str = Form(...)
+):
+    """API endpoint for automated job application"""
+    try:
+        # Read the file content
+        resume_content = await resume.read()
+        
+        # Extract text based on file type
+        if resume.filename.lower().endswith('.pdf'):
+            resume_text = extract_text_from_pdf(resume_content)
+            if not resume_text:
+                resume_text = "[Could not extract text from the PDF]"
+        else:
+            try:
+                resume_text = resume_content.decode("utf-8")
+            except UnicodeDecodeError:
+                resume_text = f"[Could not decode file {resume.filename}]"
+        
+        # Parse job data from JSON string
+        try:
+            job_data_dict = json.loads(job_data)
+        except json.JSONDecodeError:
+            raise HTTPException(status_code=400, detail="Invalid job data format. Must be valid JSON.")
+        
+        # Apply to the job
+        result = await job_applicator(resume_text, job_data_dict)
+        return JSONResponse(content=result)
+    except Exception as e:
+        logger.error(f"Error in job application API: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/tools/application_status")
+async def api_application_status():
+    """API endpoint to get the status of all job applications"""
+    try:
+        result = await application_status()
+        return JSONResponse(content=result)
+    except Exception as e:
+        logger.error(f"Error in application status API: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 # Tool execution endpoint - used by MCP protocol
 @app.post("/execute_tool")
-async def execute_tool(tool_call: ToolCall) -> Dict[str, Any]:
-    """Execute a tool based on the tool call"""
+async def execute_tool(
+    tool_name: str = Form(...),
+    resume: Optional[UploadFile] = File(None),
+    job_description: Optional[str] = Form(None),
+    experience_years: Optional[float] = Form(None),
+    location: Optional[str] = Form(None),
+    job_type: Optional[str] = Form(None),
+    job_data: Optional[str] = Form(None)
+):
+    """Execute a tool based on the provided parameters"""
     try:
-        tool_name = tool_call.name
-        params = {param.name: param.value for param in tool_call.parameters}
+        # Read resume content if provided
+        resume_content = None
+        resume_text = None
+        if resume:
+            resume_content = await resume.read()
+            
+            # Extract text from resume
+            if resume.filename.lower().endswith('.pdf'):
+                resume_text = extract_text_from_pdf(resume_content)
+                if not resume_text:
+                    resume_text = "[Could not extract text from the PDF]"
+            else:
+                try:
+                    resume_text = resume_content.decode("utf-8")
+                except UnicodeDecodeError:
+                    resume_text = f"[Could not decode file {resume.filename}]"
         
+        # Parse job data if provided
+        job_data_dict = None
+        if job_data:
+            try:
+                job_data_dict = json.loads(job_data)
+            except json.JSONDecodeError:
+                raise HTTPException(status_code=400, detail="Invalid job data format. Must be valid JSON.")
+        
+        # Execute the requested tool
         if tool_name == "ats_score_checker":
-            result = await ats_score_checker(
-                params.get("resume_content", ""),
-                params.get("job_description", "")
-            )
+            if not resume_text or not job_description:
+                raise HTTPException(status_code=400, detail="Resume and job description are required for ATS score checking")
+            result = await ats_score_checker(resume_text, job_description)
+        
         elif tool_name == "job_finder":
-            result = await job_finder(
-                params.get("resume_content", ""),
-                params.get("experience_years", 0),
-                params.get("location", ""),
-                params.get("job_type", None)
-            )
+            if not resume_text or not experience_years or not location:
+                raise HTTPException(status_code=400, detail="Resume, experience years, and location are required for job finding")
+            result = await job_finder(resume_text, experience_years, location, job_type)
+        
         elif tool_name == "cover_letter_generator":
-            result = await cover_letter_generator(
-                params.get("resume_content", ""),
-                params.get("job_description", "")
-            )
+            if not resume_text or not job_description:
+                raise HTTPException(status_code=400, detail="Resume and job description are required for cover letter generation")
+            result = await cover_letter_generator(resume_text, job_description)
+        
+        elif tool_name == "job_applicator":
+            if not resume_text or not job_data_dict:
+                raise HTTPException(status_code=400, detail="Resume and job data are required for job application")
+            result = await job_applicator(resume_text, job_data_dict)
+        
+        elif tool_name == "application_status":
+            result = await application_status()
+        
         else:
             raise HTTPException(status_code=400, detail=f"Unknown tool: {tool_name}")
         
-        return {
-            "id": tool_call.id,
-            "name": tool_name,
-            "result": result
-        }
+        return result
+    
     except Exception as e:
         logger.error(f"Error executing tool: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))

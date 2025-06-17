@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dev AI Agent - Job Seeker Assistant</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="job_applications.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -20,6 +21,7 @@
             <button class="tab-btn" data-tab="ats">ATS Score Checker</button>
             <button class="tab-btn" data-tab="jobs">Job Finder</button>
             <button class="tab-btn" data-tab="cover">Cover Letter Generator</button>
+            <button class="tab-btn" data-tab="applications">Applications</button>
         </div>
 
         <div class="tab-content active" id="chat-tab">
@@ -32,6 +34,8 @@
                                 <li>Checking your resume's ATS score for specific job descriptions</li>
                                 <li>Finding relevant job opportunities based on your experience</li>
                                 <li>Generating professional cover letters tailored to job descriptions</li>
+                                <li>Automatically applying to jobs for you</li>
+                                <li>Tracking the status of your job applications</li>
                             </ul>
                             <p>How can I help you today?</p>
                         </div>
@@ -137,10 +141,31 @@
         </div>
     </div>
 
+    <div class="tab-content" id="applications-tab">
+        <div class="tool-container">
+            <h2>Job Applications</h2>
+            <p>Track the status of your automated job applications.</p>
+            
+            <div class="applications-toolbar">
+                <button id="refresh-applications-btn" class="action-btn">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+            </div>
+            
+            <div class="result-container" id="applications-result">
+                <div class="loading-container">
+                    <div class="spinner"></div>
+                    <p class="loading-text">Loading applications...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <footer>
         <p>&copy; 2025 Dev AI Agent. All rights reserved.</p>
     </footer>
 
     <script src="script.js"></script>
+    <script src="job_applications.js"></script>
 </body>
 </html>
